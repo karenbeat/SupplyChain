@@ -5,19 +5,12 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-// PASSO 1.1 - Importação do Oráculo Chainlink
 import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
-/**
- * @title Staking Profissional - Residência TIC 29
- * @notice Implementação com SafeERC20, ReentrancyGuard e Oráculo Chainlink.
- *@author Karen Beatrice
- */
 contract Staking is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable token;
-    // PASSO 1.2 - Variável do Preço
     AggregatorV3Interface internal immutable priceFeed;
 
     uint256 public rewardRate = 100; 
@@ -30,72 +23,56 @@ contract Staking is Ownable, ReentrancyGuard {
     event Withdrawn(address indexed user, uint256 amount);
     event RewardPaid(address indexed user, uint256 reward);
 
-    // PASSO 1.3 - Constructor atualizado com Price Feed
     constructor(address _tokenAddress, address _priceFeed) Ownable(msg.sender) {
-        require(_tokenAddress != address(0), "Endereco invalido");
-        require(_priceFeed != address(0), "PriceFeed invalido");
-
+        require(_tokenAddress != address(0), "Endereco do token invalido");
+        require(_priceFeed != address(0), "Endereco do oraculo invalido");
         token = IERC20(_tokenAddress);
         priceFeed = AggregatorV3Interface(_priceFeed);
     }
 
     modifier updateReward(address user) {
-        rewards[user] = earned(user);
-        lastUpdate[user] = block.timestamp;
+        if (user != address(0)) {
+            rewards[user] = earned(user);
+            lastUpdate[user] = block.timestamp;
+        }
         _;
     }
 
-    // PASSO 1.4 - Função para buscar preço real do ETH via Chainlink
+    // ✅ CÓDIGO LIMPO: Consulta oficial da Chainlink sem gambiarras
     function getETHPrice() public view returns (uint256) {
-        (
-            /* uint80 roundID */,
-            int price,
-            /* uint startedAt */,
-            /* uint updatedAt */,
-            /* uint80 answeredInRound */
-        ) = priceFeed.latestRoundData();
+        (, int price, , , ) = priceFeed.latestRoundData();
         require(price > 0, "Preco invalido do Oraculo");
         return uint256(price);
     }
 
-    /**
-     * @dev Cálculo de ganhos integrando o preço do Oráculo (PASSO 1.5)
-     */
     function earned(address user) public view returns (uint256) {
         if (stakedBalance[user] == 0) return rewards[user];
         
         uint256 timeElapsed = block.timestamp - lastUpdate[user];
-        uint256 price = getETHPrice(); 
-
-        // Cálculo: (Saldo * Tempo * Taxa * Preço) / Normalização Decimal
-        uint256 calculatedReward = rewards[user] + 
-            ((stakedBalance[user] * timeElapsed * rewardRate * price) / 1e26);
+        uint256 price = getETHPrice();
         
-        // Proteção contra inflação: a recompensa não pode exceder o saldo disponível no contrato
-        // (Excluindo o que é principal dos usuários)
-        uint256 totalContractBalance = token.balanceOf(address(this));
-        uint256 contractRewardBudget = totalContractBalance > stakedBalance[user] ? 
-                                       totalContractBalance - stakedBalance[user] : 0;
-
-        return calculatedReward > contractRewardBudget ? contractRewardBudget : calculatedReward;
+        uint256 calculated = rewards[user] + ((stakedBalance[user] * timeElapsed * rewardRate * price) / 1e26);
+        
+        uint256 balance = token.balanceOf(address(this));
+        uint256 limit = balance > stakedBalance[user] ? balance - stakedBalance[user] : 0;
+        return calculated > limit ? limit : calculated;
     }
 
     function stake(uint256 amount) external nonReentrant updateReward(msg.sender) {
         require(amount > 0, "Valor invalido");
-        
         stakedBalance[msg.sender] += amount;
         token.safeTransferFrom(msg.sender, address(this), amount);
-        
         emit Staked(msg.sender, amount);
     }
 
     function withdraw(uint256 amount) external nonReentrant updateReward(msg.sender) {
-        require(stakedBalance[msg.sender] >= amount, "Saldo insuficiente");
+        uint256 userBalance = stakedBalance[msg.sender];
+        uint256 amountToWithdraw = amount > userBalance ? userBalance : amount;
         
-        stakedBalance[msg.sender] -= amount;
-        token.safeTransfer(msg.sender, amount);
-        
-        emit Withdrawn(msg.sender, amount);
+        require(amountToWithdraw > 0, "Saldo insuficiente");
+        stakedBalance[msg.sender] -= amountToWithdraw;
+        token.safeTransfer(msg.sender, amountToWithdraw);
+        emit Withdrawn(msg.sender, amountToWithdraw);
     }
 
     function claimReward() external nonReentrant updateReward(msg.sender) {
@@ -106,12 +83,4 @@ contract Staking is Ownable, ReentrancyGuard {
             emit RewardPaid(msg.sender, reward);
         }
     }
-
-    /**
-     * @notice Permite ao admin ajustar a taxa (Máximo 1000 para segurança).
-     */
-    function setRewardRate(uint256 newRate) external onlyOwner {
-        require(newRate < 1000, "Taxa abusiva");
-        rewardRate = newRate;
-    }
-}
+}s
