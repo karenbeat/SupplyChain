@@ -24,7 +24,9 @@ O sistema gerencia o ciclo de vida de produtos através de contratos inteligente
   Integração com dados externos para ajuste dinâmico de recompensas com base no preço do ETH.
 
 ---
-![Dashboard](./images/Captura de tela de 2026-04-20 14-20-12.png)
+<p align="center">
+  <img src="./images/Captura de tela de 2026-04-20 14-20-12.png" width="900"/>
+</p>
 
 ## Arquitetura Técnica
 
