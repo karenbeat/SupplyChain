@@ -73,7 +73,8 @@ A interface foi projetada para oferecer uma experiência fluida com atualizaçã
 
 ### Instalação
 
-1. Clone o repositório:
-
 ```bash
 git clone https://github.com/karenbeat/SupplyChain.git
+cd SupplyChain
+npm install
+npm run dev
