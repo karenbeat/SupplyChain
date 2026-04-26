@@ -74,6 +74,7 @@ A interface foi projetada para oferecer uma experiência fluida com atualizaçã
 - Tokens de teste na rede **Sepolia**
 
 ---
+Link para o vídeo demonstrativo: https://youtu.be/B-hlXwEcrcY
 
 ### Instalação
 
