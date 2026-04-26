@@ -25,7 +25,7 @@ O sistema gerencia o ciclo de vida de produtos através de contratos inteligente
 
 ---
 <p align="center">
-  <img src="./images/dashboard.png" width="900"/>
+  <img src="./images/homepage.png" width="900"/>
 </p>
 
 ## Arquitetura Técnica
