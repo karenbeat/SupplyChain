@@ -4,6 +4,9 @@ Este repositório contém o MVP de um protocolo descentralizado para rastreabili
 O projeto utiliza tecnologia blockchain para garantir **transparência, imutabilidade e segurança** no registro de eventos logísticos, integrando NFTs, Staking e Governança Descentralizada (DAO).
 
 ---
+<p align="center">
+  <img src="./images/supplylogo.png" width="900"/>
+</p>
 
 ## Visão Geral
 
