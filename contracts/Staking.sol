@@ -38,7 +38,7 @@ contract Staking is Ownable, ReentrancyGuard {
         _;
     }
 
-    // ✅ CÓDIGO LIMPO: Consulta oficial da Chainlink sem gambiarras
+    // Consulta da Chainlink 
     function getETHPrice() public view returns (uint256) {
         (, int price, , , ) = priceFeed.latestRoundData();
         require(price > 0, "Preco invalido do Oraculo");
