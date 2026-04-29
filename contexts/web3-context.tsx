@@ -79,7 +79,7 @@ const formatAddress = (addr: string | null) => {
 };
 
 
-// ✅ FUNÇÃO COMPLETA E FECHADA
+
 const refreshUserData = useCallback(async (address: string) => {
   if (!address || !isAddress(address)) return;
 
@@ -101,7 +101,7 @@ try {
 }
     setState(prev => ({
   ...prev,
-  account: address, // ✅ ADICIONE ISSO
+  account: address, 
   tokenBalance: formatUnits(bal, 18),
   stakedBalance: formatUnits(sBal, 18),
   earnedRewards: Number(formatUnits(earned, 18)).toFixed(4),
@@ -114,7 +114,7 @@ try {
 }, [getProvider]);
 
 
-// ✅ useEffect DEPOIS da função
+
 useEffect(() => {
   if (!state.account) return;
 
@@ -126,7 +126,7 @@ useEffect(() => {
 }, [state.account, refreshUserData]);
 
 
-// ✅ connectWallet FORA da função
+
 const connectWallet = useCallback(async () => {
   if (!window.ethereum) return;
 
@@ -158,7 +158,7 @@ await refreshUserData(accounts[0]);
 
   // --- LOGICA DE STAKING ---
 
-// ---------------- STAKING ----------------
+
 // ---------------- STAKING ----------------
 
 const approveToken = async (amount: string) => {
@@ -199,7 +199,7 @@ const stake = async (amount: string) => {
   const parsed = parseUnits(amount, 18);
   const user = await signer.getAddress();
 
-  // 🔥 CORREÇÃO NECESSÁRIA (não inventado, só proteção)
+  
   const allowance = await token.allowance(user, CONTRACT_ADDRESSES.STAKING);
 
   if (allowance < parsed) {
@@ -228,7 +228,7 @@ const withdraw = async (amount: string) => {
 
   const parsed = parseUnits(amount, 18);
 
-  // 🔥 CORREÇÃO NECESSÁRIA (evita revert)
+  //  evita revert
   const user = await signer.getAddress();
   const staked = await contract.stakedBalance(user);
 
